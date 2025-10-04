@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard SMK Maharati</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .progress-bar {
+            transition: all 0.8s ease-in-out;
+        }
+        .chart-container {
+            background: linear-gradient(135deg, #fef3c7 0%, #dbeafe 100%);
+        }
+        #progressCircle {
+            transition: stroke-dasharray 1s ease-in-out, stroke 0.3s ease;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-online { background-color: #10b981; }
+        .status-offline { background-color: #ef4444; }
+        .status-loading { 
+            background-color: #f59e0b; 
+            animation: pulse 1s infinite;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-yellow-50 to-blue-50 min-h-screen font-sans">
+    <div class="container mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <!-- Logo -->
+            <div class="mb-6">
+                <div class="relative mx-auto w-32 h-32">
+                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 via-blue-500 to-purple-600 rounded-full shadow-2xl"></div>
+                    <div class="absolute inset-2 bg-white rounded-full shadow-inner flex items-center justify-center">
+                        <div class="text-2xl font-bold text-gray-700">SMK</div>
+                    </div>
+                    <div class="absolute inset-1 border-2 border-white/30 rounded-full"></div>
+                    <div class="absolute -inset-4 bg-gradient-to-br from-yellow-400/20 via-blue-500/20 to-purple-600/20 rounded-full blur-xl"></div>
+                </div>
+            </div>
+            
+            <!-- School Name -->
+            <div class="mb-4">
+                <h1 class="text-3xl font-bold text-gray-800 mb-1">SMK MAHARATI</h1>
+                <p class="text-lg text-gray-600 italic font-light">Mining Vocational School of Pama Group</p>
+            </div>
+            
+            <!-- Dashboard Title -->
+            <h2 class="text-4xl font-bold text-gray-800 mb-2">Dashboard</h2>
+            <div class="w-24 h-1 bg-gradient-to-r from-yellow-400 to-blue-500 mx-auto rounded-full"></div>
+            
+            <!-- Status Connection -->
+            <div class="mt-4 flex items-center justify-center">
+                <span id="connectionStatus" class="status-indicator status-loading"></span>
+                <span id="lastUpdate" class="text-xs text-gray-400 ml-2"></span>
+            </div>
+            
+            <!-- Control Buttons -->
+            <div class="mt-6 flex justify-center">
+                <button id="refreshBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                    🔄 Refresh Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-container rounded-xl shadow-lg p-6 mb-8 fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-700">Data Pencapaian Target</h2>
+            </div>
+            <div id="chartContainer" class="space-y-4">
+                <div class="text-center text-gray-500 py-12">
+                    <div class="text-6xl mb-4 animate-pulse">📊</div>
+                    <p class="text-lg mb-2">Memuat data dari Google Sheets...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-400">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">Jumlah Guru</p>
+                        <p id="totalGuru" class="text-3xl font-bold text-gray-800">-</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-400">
+                <div class="text-center">
+                    <p class="text-gray-600 text-sm mb-4">Rata-rata Pencapaian</p>
+                    <div class="relative w-28 h-28 mx-auto mb-2">
+                        <svg class="w-28 h-28 transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-gray-200" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path id="progressCircle" class="text-blue-500" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="rataRata" class="text-xl font-bold text-gray-800">-%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-400">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">Memenuhi Target (≥90%)</p>
+                        <p id="memenuhiTarget" class="text-3xl font-bold text-gray-800">-</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-12 text-center">
+            <p class="text-gray-500 text-sm">© 2025 Kurikulum SMK Maharati</p>
+        </div>
+    </div>
+
+    <script>
+        let dataGuru = [];
+        const SHEET_ID = '1kaG-eiphkv0n3Uwk4VRG2G5HWrAOAYHOAwTuVjJtEHM';
+        const SHEET_RANGE = 'Sheet1!A:B';
+        let autoRefreshInterval;
+
+        function updateConnectionStatus(status) {
+            const statusIndicator = document.getElementById('connectionStatus');
+            statusIndicator.className = `status-indicator status-${status}`;
+        }
+
+        function updateLastUpdate() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID');
+            document.getElementById('lastUpdate').textContent = `Update: ${timeString}`;
+        }
+
+        async function fetchFromGoogleSheets() {
+            updateConnectionStatus('loading');
+            
+            // Gunakan Google Sheets public export (CSV format)
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&range=${SHEET_RANGE}`;
+
+            console.log('Fetching from:', url);
+
+            try {
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+
+                console.log('Raw data:', data);
+
+                // Process data (skip header row)
+                const processedData = [];
+                for (let i = 1; i < data.length; i++) {
+                    const row = data[i];
+                    if (row && row.length >= 2 && row[0] && row[1]) {
+                        const nama = row[0].toString().trim();
+                        const target = parseFloat(row[1]);
+                        
+                        if (nama && !isNaN(target) && target >= 0 && target <= 100) {
+                            processedData.push({ nama, target });
+                        }
+                    }
+                }
+
+                if (processedData.length === 0) {
+                    throw new Error('Tidak ada data valid di spreadsheet');
+                }
+
+                setData(processedData);
+                updateConnectionStatus('online');
+                updateLastUpdate();
+                
+                console.log('Data berhasil dimuat:', processedData.length, 'guru');
+
+            } catch (error) {
+                console.error('Error fetching from Google Sheets:', error);
+                updateConnectionStatus('offline');
+                showErrorMessage(error.message);
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const result = [];
+            
+            for (let line of lines) {
+                if (line.trim()) {
+                    // Simple CSV parsing (handles basic cases)
+                    const values = line.split(',').map(val => 
+                        val.replace(/^"(.*)"$/, '$1').trim()
+                    );
+                    result.push(values);
+                }
+            }
+            
+            return result;
+        }
+
+        function showErrorMessage(errorMsg) {
+            const container = document.getElementById('chartContainer');
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-4">
+                        <p class="text-red-800 mb-2">❌ Gagal memuat data</p>
+                        <p class="text-sm text-red-700 mb-4">${errorMsg}</p>
+                        <p class="text-xs text-red-600">Pastikan Google Sheets sudah di-share public dan format data benar</p>
+                    </div>
+                    <button onclick="fetchFromGoogleSheets()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">🔄 Coba Lagi</button>
+                </div>
+            `;
+        }
+
+        function updateChart() {
+            const container = document.getElementById('chartContainer');
+            
+            if (dataGuru.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-12">
+                        <div class="text-6xl mb-4">📊</div>
+                        <p class="text-lg mb-2">Belum ada data guru</p>
+                        <p class="text-sm">Periksa koneksi atau format data di Google Sheets</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = dataGuru.map((guru, index) => `
+                <div class="bg-white rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-semibold text-gray-800 text-lg">${guru.nama}</span>
+                        <span class="text-lg font-bold px-3 py-1 rounded-full ${
+                            guru.target >= 90 
+                                ? 'bg-green-100 text-green-700' 
+                                : guru.target >= 75 
+                                    ? 'bg-yellow-100 text-yellow-700' 
+                                    : 'bg-red-100 text-red-700'
+                        }">${guru.target}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-8 relative overflow-hidden">
+                        <div class="progress-bar h-full bg-gradient-to-r ${
+                            guru.target >= 90 
+                                ? 'from-green-400 to-green-600' 
+                                : guru.target >= 75 
+                                    ? 'from-yellow-400 to-blue-500' 
+                                    : 'from-red-400 to-orange-500'
+                        } rounded-full transition-all duration-1000 ease-out" 
+                             style="width: ${guru.target}%">
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-sm font-bold text-gray-700">${guru.target}%</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateSummary() {
+            const total = dataGuru.length;
+            const rataRata = total > 0 ? (dataGuru.reduce((sum, guru) => sum + guru.target, 0) / total).toFixed(1) : 0;
+            const memenuhi = dataGuru.filter(guru => guru.target >= 90).length;
+
+            document.getElementById('totalGuru').textContent = total;
+            document.getElementById('rataRata').textContent = rataRata + '%';
+            document.getElementById('memenuhiTarget').textContent = memenuhi;
+
+            // Update circular progress
+            const progressCircle = document.getElementById('progressCircle');
+            const circumference = 100;
+            const progress = rataRata;
+            const dashArray = `${progress}, ${circumference}`;
+            
+            progressCircle.style.strokeDasharray = dashArray;
+            
+            // Change color based on average
+            if (progress >= 90) {
+                progressCircle.classList.remove('text-blue-500', 'text-yellow-500', 'text-red-500');
+                progressCircle.classList.add('text-green-500');
+            } else if (progress >= 75) {
+                progressCircle.classList.remove('text-blue-500', 'text-green-500', 'text-red-500');
+                progressCircle.classList.add('text-yellow-500');
+            } else {
+                progressCircle.classList.remove('text-blue-500', 'text-green-500', 'text-yellow-500');
+                progressCircle.classList.add('text-red-500');
+            }
+        }
+
+        function setData(newData) {
+            dataGuru = newData;
+            updateChart();
+            updateSummary();
+        }
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            autoRefreshInterval = setInterval(() => {
+                fetchFromGoogleSheets();
+            }, 60000); // Refresh setiap 1 menit
+        }
+
+        // Event Listeners
+        document.getElementById('refreshBtn').addEventListener('click', fetchFromGoogleSheets);
+
+        // Initialize
+        fetchFromGoogleSheets().then(() => {
+            startAutoRefresh();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989543c7151ab5e7',t:'MTc1OTU4NzA0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
