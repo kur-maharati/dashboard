@@ -73,7 +73,7 @@
         <div class="p-4">
             <!-- Menu Header -->
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold">Menu Utama</h2>
+                <button id="menuUtama" class="text-lg font-bold hover:text-blue-600 transition-colors cursor-pointer">Menu Utama</button>
                 <button id="closeMenu" class="text-gray-600 hover:text-gray-800 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -254,11 +254,17 @@
                 for (let i = 1; i < data.length; i++) {
                     const row = data[i];
                     if (row && row.length >= 2 && row[0] && row[1]) {
-                        const nama = row[0].toString().trim();
+                        let nama = row[0].toString().trim();
+                        // Remove surrounding quotes if present
+                        nama = nama.replace(/^["']|["']$/g, '');
                         const target = parseFloat(row[1]);
                         
-                        if (nama && !isNaN(target) && target >= 0 && target <= 100) {
+                        console.log(`Processing row ${i}: nama="${nama}", target=${target}`);
+                        
+                        if (nama && nama.length > 0 && !isNaN(target) && target >= 0 && target <= 100) {
                             processedData.push({ nama, target });
+                        } else {
+                            console.log(`Skipping row ${i}: invalid data`);
                         }
                     }
                 }
@@ -286,10 +292,25 @@
             
             for (let line of lines) {
                 if (line.trim()) {
-                    // Simple CSV parsing (handles basic cases)
-                    const values = line.split(',').map(val => 
-                        val.replace(/^"(.*)"$/, '$1').trim()
-                    );
+                    // Enhanced CSV parsing to handle names with commas and quotes
+                    const values = [];
+                    let current = '';
+                    let inQuotes = false;
+                    
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            values.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    values.push(current.trim()); // Add the last value
+                    
                     result.push(values);
                 }
             }
@@ -403,6 +424,7 @@
         const sideMenu = document.getElementById('sideMenu');
         const menuOverlay = document.getElementById('menuOverlay');
         const closeMenu = document.getElementById('closeMenu');
+        const menuUtama = document.getElementById('menuUtama');
 
         function openMenu() {
             sideMenu.classList.remove('-translate-x-full');
@@ -419,6 +441,10 @@
         menuButton.addEventListener('click', openMenu);
         closeMenu.addEventListener('click', closeMenuFunc);
         menuOverlay.addEventListener('click', closeMenuFunc);
+        menuUtama.addEventListener('click', () => {
+            closeMenuFunc();
+            location.reload();
+        });
 
         // Close menu with Escape key
         document.addEventListener('keydown', (e) => {
@@ -458,5 +484,5 @@
             startAutoRefresh();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989b62ab7279b5e7',t:'MTc1OTY1MTIyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989bc23ce18a0fad',t:'MTc1OTY1NTE0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
