@@ -9,53 +9,116 @@
         body {
             box-sizing: border-box;
         }
-        .progress-bar {
-            transition: all 0.8s ease-in-out;
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .chart-container {
-            background: linear-gradient(135deg, #fef3c7 0%, #dbeafe 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
         }
-        #progressCircle {
-            transition: stroke-dasharray 1s ease-in-out, stroke 0.3s ease;
+        
+        .progress-bar {
+            animation: progressAnimation 2s ease-out;
         }
+        
+        @keyframes progressAnimation {
+            from { width: 0%; }
+        }
+        
         .status-indicator {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             display: inline-block;
-            margin-right: 8px;
+            animation: pulse 2s infinite;
         }
-        .status-online { background-color: #10b981; }
-        .status-offline { background-color: #ef4444; }
-        .status-loading { 
-            background-color: #f59e0b; 
-            animation: pulse 1s infinite;
+        
+        .status-online {
+            background-color: #10b981;
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+        
+        .status-offline {
+            background-color: #ef4444;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .status-loading {
+            background-color: #f59e0b;
         }
+        
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+        
+        .hover-scale {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-yellow-50 to-blue-50 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-blue-50 via-white to-yellow-50 min-h-screen">
+    <!-- Navigation Menu -->
+    <div id="menuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300"></div>
+    
+    <div id="sideMenu" class="fixed left-0 top-0 h-auto w-64 bg-gradient-to-b from-gray-100 to-gray-200 text-gray-800 z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl rounded-r-xl">
+        <div class="p-4">
+            <!-- Menu Header -->
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold">Menu Utama</h2>
+                <button id="closeMenu" class="text-gray-600 hover:text-gray-800 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Menu Items -->
+            <nav class="space-y-2">
+                <a href="#" class="menu-item block p-3 rounded-lg hover:bg-white hover:shadow-md transition-all duration-200">
+                    <h3 class="font-medium">Input Jurnal</h3>
+                </a>
+                
+                <a href="#" class="menu-item block p-3 rounded-lg hover:bg-white hover:shadow-md transition-all duration-200">
+                    <h3 class="font-medium">Pendingan</h3>
+                </a>
+                
+                <a href="#" class="menu-item block p-3 rounded-lg hover:bg-white hover:shadow-md transition-all duration-200">
+                    <h3 class="font-medium">Jadwal Pelajaran</h3>
+                </a>
+            </nav>
+        </div>
+    </div>
+
     <div class="container mx-auto px-6 py-8">
+        <!-- Menu Button -->
+        <button id="menuButton" class="fixed top-6 left-6 z-30 bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-lg shadow-lg transition-all duration-200 hover:scale-105">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+        
         <!-- Header -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-8 bg-gradient-to-br from-blue-50 via-white to-yellow-50 rounded-2xl shadow-2xl py-8 px-6">
             <!-- Logo -->
             <div class="mb-6">
                 <div class="relative mx-auto w-32 h-32">
+                    <!-- Lingkaran berwarna gradient -->
                     <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 via-blue-500 to-purple-600 rounded-full shadow-2xl"></div>
+                    <!-- Lingkaran putih dalam -->
                     <div class="absolute inset-2 bg-white rounded-full shadow-inner flex items-center justify-center">
-                        <div class="text-2xl font-bold text-gray-700">SMK</div>
+                        <img src="https://iili.io/KWiqdUg.png" alt="Logo SMK Maharati" class="w-24 h-24 object-contain" onerror="this.style.display='none'; document.getElementById('fallbackText').style.display='block';">
+                        <div id="fallbackText" class="text-2xl font-bold text-gray-700" style="display: none;">SMK</div>
                     </div>
-                    <div class="absolute inset-1 border-2 border-white/30 rounded-full"></div>
+                    <!-- Efek glow -->
                     <div class="absolute -inset-4 bg-gradient-to-br from-yellow-400/20 via-blue-500/20 to-purple-600/20 rounded-full blur-xl"></div>
                 </div>
             </div>
@@ -67,7 +130,7 @@
             </div>
             
             <!-- Dashboard Title -->
-            <h2 class="text-4xl font-bold text-gray-800 mb-2">Dashboard</h2>
+            <h2 class="text-4xl font-bold text-blue-800 mb-2">Dashboard</h2>
             <div class="w-24 h-1 bg-gradient-to-r from-yellow-400 to-blue-500 mx-auto rounded-full"></div>
             
             <!-- Status Connection -->
@@ -76,12 +139,12 @@
                 <span id="lastUpdate" class="text-xs text-gray-400 ml-2"></span>
             </div>
             
-            <!-- Control Buttons -->
-            <div class="mt-6 flex justify-center">
-                <button id="refreshBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-                    🔄 Refresh Data
-                </button>
+            <!-- Educational Motto -->
+            <div class="mt-4">
+                <p class="text-sm text-gray-600 italic font-medium">"Ing Ngarso Sung Tulodo, Ing Madyo Mangun Karso, Tut Wuri Handayani"</p>
             </div>
+            
+
         </div>
 
         <!-- Chart Section -->
@@ -263,10 +326,10 @@
             }
 
             container.innerHTML = dataGuru.map((guru, index) => `
-                <div class="bg-white rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="font-semibold text-gray-800 text-lg">${guru.nama}</span>
-                        <span class="text-lg font-bold px-3 py-1 rounded-full ${
+                <div class="bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-gray-800 text-base">${guru.nama}</span>
+                        <span class="text-sm font-bold px-2 py-1 rounded-full ${
                             guru.target >= 90 
                                 ? 'bg-green-100 text-green-700' 
                                 : guru.target >= 75 
@@ -274,7 +337,7 @@
                                     : 'bg-red-100 text-red-700'
                         }">${guru.target}%</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-8 relative overflow-hidden">
+                    <div class="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
                         <div class="progress-bar h-full bg-gradient-to-r ${
                             guru.target >= 90 
                                 ? 'from-green-400 to-green-600' 
@@ -283,9 +346,6 @@
                                     : 'from-red-400 to-orange-500'
                         } rounded-full transition-all duration-1000 ease-out" 
                              style="width: ${guru.target}%">
-                        </div>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="text-sm font-bold text-gray-700">${guru.target}%</span>
                         </div>
                     </div>
                 </div>
@@ -338,13 +398,65 @@
             }, 60000); // Refresh setiap 1 menit
         }
 
-        // Event Listeners
-        document.getElementById('refreshBtn').addEventListener('click', fetchFromGoogleSheets);
+        // Menu functionality
+        const menuButton = document.getElementById('menuButton');
+        const sideMenu = document.getElementById('sideMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const closeMenu = document.getElementById('closeMenu');
+
+        function openMenu() {
+            sideMenu.classList.remove('-translate-x-full');
+            menuOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenuFunc() {
+            sideMenu.classList.add('-translate-x-full');
+            menuOverlay.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        menuButton.addEventListener('click', openMenu);
+        closeMenu.addEventListener('click', closeMenuFunc);
+        menuOverlay.addEventListener('click', closeMenuFunc);
+
+        // Close menu with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMenuFunc();
+            }
+        });
+
+        // Menu item click handlers
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const menuText = item.querySelector('h3').textContent;
+                
+                let url = '';
+                switch(menuText) {
+                    case 'Input Jurnal':
+                        url = 'https://kur-maharati.github.io/jurnal/';
+                        break;
+                    case 'Pendingan':
+                        url = 'https://kur-maharati.github.io/pendingan/';
+                        break;
+                    case 'Jadwal Pelajaran':
+                        url = 'https://drive.google.com/drive/folders/1PVDSUSO7USOTCA9Nf1S_JaI0js_c5w_d?usp=sharing';
+                        break;
+                }
+                
+                if (url) {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }
+                closeMenuFunc();
+            });
+        });
 
         // Initialize
         fetchFromGoogleSheets().then(() => {
             startAutoRefresh();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989543c7151ab5e7',t:'MTc1OTU4NzA0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989b62ab7279b5e7',t:'MTc1OTY1MTIyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
